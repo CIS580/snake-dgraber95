@@ -218,14 +218,22 @@ function newApple(){
     while(true){
         var tempX = (pixelSize + pixelGap)*Math.floor((Math.random()*canvasPixelWidth)) + pixelGap;
         var tempY = (pixelSize + pixelGap)*Math.floor((Math.random()*canvasPixelHeight)) + pixelGap;
-        if( snake.indexOf([tempX, tempY]) == -1){
-            appleX = tempX;
-            appleY = tempY;
-            return;
-        }
+		if(!check_in(tempX, tempY)){
+			appleX = tempX;
+			appleY = tempY;
+			return;
+		}
     }
 }
-// document.body.innerHTML +='<div style="color:red;font-size:200%"><br>' + numberd + '</div>';
+
+function check_in(tempX, tempY){
+	for(var i in snake){
+		if(snake[i][0] == tempX && snake[i][1] == tempY){
+			return true;
+		}
+	}
+	return false;
+}
 
 /* Launch the game */
 window.requestAnimationFrame(loop);
