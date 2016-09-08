@@ -17,6 +17,8 @@ var accumulatedTime = 0;
 var growSnakeBy = 4;
 var ready = false;
 var gameOver = false;
+var paused = false;
+var score = 0;
 var input = {
     up: false,
     down: false,
@@ -32,12 +34,14 @@ var input = {
 function loop(newTime) {
   var elapsedTime = newTime - oldTime;
   oldTime = newTime;
-  
+
   update(elapsedTime);
   render(elapsedTime);
 
   // Flip the back buffer
+  frontCtx.beginPath();
   frontCtx.drawImage(backBuffer, 0, 0);
+  frontCtx.closePath();
 
   // Run the next loop
   window.requestAnimationFrame(loop);
@@ -55,8 +59,7 @@ function update(elapsedTime) {
     var snakeHead = snake[snake.length-1];
     accumulatedTime += elapsedTime;
 
-    if(!gameOver){
-
+    if(!gameOver && !paused){
       // TODO: Determine if the snake has eaten its tail
         if((snake.length > 1) && (snakeHead != snake[snake.length-2])){
             for(var i = 0; i < snake.length - 1; i++){
@@ -88,6 +91,7 @@ function update(elapsedTime) {
 
       // TODO: Determine if the snake has eaten an apple
         if(snakeHead[0] == [appleX] && snakeHead[1] == [appleY]){
+			score += 100;
       // TODO: Grow the snake periodically
             for(var i = 0; i < growSnakeBy; i++){
                 snake.unshift(snake[0]);
@@ -105,7 +109,12 @@ function update(elapsedTime) {
         }
 
       // TODO: [Extra Credit] Determine if the snake has run into an obstacle
-    }
+    }else if(gameOver){
+		if(accumulatedTime >= 40){
+            accumulatedTime = 0;
+			snake.shift();
+		}
+	}
 }
 
 /**
@@ -115,11 +124,29 @@ function update(elapsedTime) {
   * the number of milliseconds passed since the last frame.
   */
 function render(elapsedTime) {
-    backCtx.clearRect(0, 0, backBuffer.width, backBuffer.height);
+	backCtx.fillStyle = "white";
+    backCtx.fillRect(0, 0, backBuffer.width, backBuffer.height);
   
+	document.getElementById("score").innerHTML = "Score: " + score;
+	
   // TODO: Draw the game objects into the backBuffer
-    backCtx.fillStyle = "red";
-    backCtx.fillRect(appleX, appleY, pixelSize, pixelSize);
+	if(!gameOver){
+		backCtx.fillStyle = "red";
+		backCtx.fillRect(appleX, appleY, pixelSize, pixelSize);
+	}else if(paused){
+		backCtx.font = "50px Lucida Console";
+		backCtx.fillStyle = "black";
+		backCtx.textAlign = "center";
+		backCtx.fillText("PAUSED", backBuffer.width/2, backBuffer.height/2); 
+	}else{
+		backCtx.font = "50px Lucida Console";
+		backCtx.fillStyle = "red";
+		backCtx.textAlign = "center";
+		backCtx.fillText("GAME OVER", backBuffer.width/2, backBuffer.height/2); 
+		backCtx.font = "25px Lucida Console";
+		backCtx.fillStyle = "black";
+		backCtx.fillText("Final Score: " + score, backBuffer.width/2, backBuffer.height/2 + 30);
+	}
     
     backCtx.fillStyle = "green";
     for(var i = 0; i < snake.length; i++){
